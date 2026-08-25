@@ -87,16 +87,18 @@ fw.describe(ADDON .. " - voice pack registration", function()
 		fw.eq(#registered, 2, "packs registered once the API arrived")
 	end)
 
-	fw.it("hands the packs over once however many addons load after it", function()
+	fw.it("gives up once MiniAuras has loaded, however its API turned out", function()
 		local registered = {}
 
 		LoadWith(nil)
 
+		WowMock.FireEvent("ADDON_LOADED", "MiniAuras")
+
+		-- Nothing can publish the API after MiniAuras' own load, so a later one is not ours.
 		_G.MiniAurasApi = NewApi(registered)
 		WowMock.FireEvent("ADDON_LOADED", "MiniAuras")
-		WowMock.FireEvent("ADDON_LOADED", "SomethingElse")
 
-		fw.eq(#registered, 2, "packs registered")
+		fw.eq(#registered, 0, "the waiter stopped at the first MiniAuras load")
 	end)
 
 	fw.it("keeps waiting while some other addon loads", function()
@@ -114,16 +116,11 @@ fw.describe(ADDON .. " - voice pack registration", function()
 		fw.eq(#registered, 2, "MiniAuras' own load is")
 	end)
 
-	fw.it("waits for a MiniAuras too old to know about voice packs", function()
-		local registered = {}
-
-		-- The API global exists from 5.0.0, but RegisterVoicePack only from 5.1.0, so its
-		-- absence is what says the pack cannot be handed over yet.
-		LoadWith({ v1 = {} })
-
-		_G.MiniAurasApi = NewApi(registered)
-		WowMock.FireEvent("ADDON_LOADED", "MiniAuras")
-
-		fw.eq(#registered, 2, "packs registered once the real API arrived")
+	fw.it("loads cleanly against a MiniAuras too old to know about voice packs", function()
+		-- The API global exists from 5.0.0, but RegisterVoicePack only from 5.1.0, so calling
+		-- it unguarded is what an older MiniAuras would break on.
+		fw.no_error(function()
+			LoadWith({ v1 = {} })
+		end, "loading against an API without RegisterVoicePack")
 	end)
 end)

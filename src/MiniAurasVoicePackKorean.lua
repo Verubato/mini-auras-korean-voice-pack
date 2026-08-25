@@ -7,8 +7,6 @@ local LOCALES = { "koKR" }
 local PACK_NAMES = { "Hyuk", "Rosa Oh" }
 local MINIAURAS = "MiniAuras"
 
-local waiter
-
 ---@return boolean handedOver false while MiniAuras has not published its API yet
 local function RegisterPacks()
 	local api = MiniAurasApi and MiniAurasApi.v1
@@ -33,7 +31,7 @@ end
 if not RegisterPacks() then
 	-- MiniAuras is an optional dependency, so it normally loads first. It can still arrive
 	-- afterwards, and the packs are only offered once it has.
-	waiter = CreateFrame("Frame")
+	local waiter = CreateFrame("Frame")
 
 	waiter:RegisterEvent("ADDON_LOADED")
 	waiter:SetScript("OnEvent", function(self, _, loaded)
@@ -41,7 +39,7 @@ if not RegisterPacks() then
 			return
 		end
 
-		-- Its one chance: once MiniAuras has loaded, waiting longer cannot make the API appear.
+		-- Once MiniAuras has loaded, waiting longer cannot make the API appear.
 		self:UnregisterAllEvents()
 		RegisterPacks()
 	end)
