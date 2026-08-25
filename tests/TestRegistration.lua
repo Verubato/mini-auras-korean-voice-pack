@@ -24,7 +24,6 @@ local function NewApi(registered)
 end
 
 ---@param api table? what MiniAuras has published before the addon loads, if anything
----@return table registered
 local function LoadWith(api)
 	WowMock.Install()
 
