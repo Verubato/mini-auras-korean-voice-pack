@@ -99,6 +99,21 @@ fw.describe(ADDON .. " - voice pack registration", function()
 		fw.eq(#registered, 2, "packs registered")
 	end)
 
+	fw.it("keeps waiting while some other addon loads", function()
+		local registered = {}
+
+		LoadWith(nil)
+
+		_G.MiniAurasApi = NewApi(registered)
+		WowMock.FireEvent("ADDON_LOADED", "SomethingElse")
+
+		fw.eq(#registered, 0, "another addon's load is not the signal")
+
+		WowMock.FireEvent("ADDON_LOADED", "MiniAuras")
+
+		fw.eq(#registered, 2, "MiniAuras' own load is")
+	end)
+
 	fw.it("waits for a MiniAuras too old to know about voice packs", function()
 		local registered = {}
 
